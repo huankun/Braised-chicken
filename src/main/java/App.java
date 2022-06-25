@@ -14,7 +14,49 @@ public class App {
 
     public String bestCharge(List<String> inputs) {
         //TODO: write code here
-
-        return null;
+        StringBuilder res = new StringBuilder();
+        List<Item> items = itemRepository.findAll();
+        List<SalesPromotion> salesPromotionList = salesPromotionRepository.findAll();
+        List<String> relatedItems = salesPromotionList.get(1).getRelatedItems();
+        int sum1 = 0;
+        int sum2 = 0;
+        boolean flag = false;
+        res.append("============= Order details =============\n");
+        for(String i : inputs){
+            String[] s = i.split(" ");
+            // 30减6
+            for(Item item : items){
+                if(s[0].equals(item.getId())){
+                    int itemTotal = Integer.parseInt(s[2]) * (int)item.getPrice();
+                    sum1 += itemTotal;
+                    if(relatedItems.contains(s[0])){
+                        flag = true;
+                        sum2 += itemTotal / 2;
+                    }else {
+                        sum2 += itemTotal;
+                    }
+                    res.append(item.getName() + " x " + s[2] + " = " + itemTotal + " yuan\n");
+                }
+            }
+        }
+        res.append("-----------------------------------\n");
+        if(sum1 >= 30 && (sum1 - 6) <= sum2){
+            sum1 -= 6;
+            res.append("Promotion used:\n");
+            res.append("Deduct 6 yuan when the order reaches 30 yuan, saving 6 yuan\n");
+            res.append("-----------------------------------\n" +
+                    "In total: "+ sum1 +" yuan\n" +
+                    "===================================");
+        } else if(flag){
+            res.append("Promotion used:\n");
+            res.append("Half price for certain dishes (Braised chicken and Cold noodles),saving "+ (sum1 - sum2) +" yuan\n");
+            res.append("-----------------------------------\n" +
+                    "In total: "+ sum2 +" yuan\n" +
+                    "===================================");
+        } else {
+          res.append("In total: "+ sum1 +" yuan\n" +
+                  "===================================");
+        }
+        return res.toString();
     }
 }
